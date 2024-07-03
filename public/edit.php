@@ -8,8 +8,8 @@
     }
 
     else if ($_POST['type'] == 'providers')
-        $connection -> query('UPDATE `providers` SET `name` = "' . $_POST['name'] . '", `description` = "' . $_POST['description'] . '", `domain` = "' . $_POST['domain'] . '", `link` = "' . $_POST['link'] . '" WHERE `id` = ' . $_POST['id']);
+        $connection -> query('UPDATE `providers` SET `license-id` = "' . $_POST['license-id'] . '", `name` = "' . $_POST['name'] . '", `description` = "' . $_POST['description'] . '", `domain` = "' . $_POST['domain'] . '", `link` = "' . $_POST['link'] . '" WHERE `id` = ' . $_POST['id']);
 
     else if ($_POST['type'] == 'clients')
-        $connection -> query('UPDATE `clients` SET `name` = "' . $_POST['name'] . '", `description` = "' . $_POST['short-name'] . '" WHERE `id` = ' . $_POST['id']);
+        $connection -> query('UPDATE `clients` SET `license-id` = "' . $_POST['license-id'] . '", `name` = "' . $_POST['name'] . '", `short-name` = "' . $_POST['short-name'] . '" WHERE `id` = ' . $_POST['id']);
 ?>

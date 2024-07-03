@@ -87,7 +87,7 @@
                                     <tr scope="row">
                                         <th scope="row">
                                             <label class="control control--checkbox">
-                                                <input type="checkbox" id="<?= $license['id'] ?>" class="licenses" onchange="change_remove(this)">
+                                                <input type="checkbox" id="<?= $license['id'] ?>" class="licenses" onchange="edit_remove(this)">
                                                 <div class="control__indicator"></div>
                                             </label>
                                         </th>
@@ -142,7 +142,7 @@
                                     <tr scope="row">
                                         <th scope="row">
                                             <label class="control control--checkbox">
-                                                <input type="checkbox" id="<?= $provider['id'] ?>" class="providers" onchange="change_remove(this)">
+                                                <input type="checkbox" id="<?= $provider['id'] ?>" class="providers" onchange="edit_remove(this)">
                                                 <div class="control__indicator"></div>
                                             </label>
                                         </th>
@@ -198,7 +198,7 @@
                                     <tr scope="row">
                                         <th scope="row">
                                             <label class="control control--checkbox">
-                                                <input type="checkbox" id="<?= $client['id'] ?>" class="clients" onchange="change_remove(this)">
+                                                <input type="checkbox" id="<?= $client['id'] ?>" class="clients" onchange="edit_remove(this)">
                                                 <div class="control__indicator"></div>
                                             </label>
                                         </th>
@@ -233,8 +233,12 @@
         <script src="js/bootstrap.min.js"></script>
 
         <script>
+            navFixed = true
+
             function addLicense() {
-                const rows = document.querySelectorAll('table.table.custom-table')[0].querySelector('tbody')
+                const rows = document.querySelectorAll('table.table.custom-table')[0].querySelector('tbody'),
+                      nav = document.querySelector('nav')
+
                 rows.innerHTML += `<tr scope="row">
     <th scope="row"></th>
     <td><input class="name" placeholder="Name"></td>
@@ -246,12 +250,16 @@
 </tr>
 <tr class="spacer"><td colspan="100"></td></tr>`
                 
-                document.querySelectorAll('nav > div')[0].innerHTML = '<a href="#licenses">Lizenzen</a><button onclick="add(\'licenses\', \'add\')">Fertig</button>'
+                nav.querySelectorAll('div')[0].innerHTML = '<a href="#licenses">Lizenzen</a><button onclick="location.reload()">Abbrechen</button><button onclick="add(\'licenses\', \'add\')">Fertig</button>'
+                document.querySelectorAll('.add').forEach(add => add.onclick = '')
+                navFixed = false
+                nav.style.display = 'flex'
             }
 
             function addOther(type) {
-                const table = document.querySelectorAll('.table-responsive.custom-table-responsive')[type]
-                const rows = table.querySelector('tbody')
+                const table = document.querySelectorAll('.table-responsive.custom-table-responsive')[type],
+                      rows = table.querySelector('tbody'),
+                      nav = document.querySelector('nav')
 
                 if (type == 1) {
                     rows.innerHTML += `<tr scope="row">
@@ -263,7 +271,7 @@
     <td>↓ Wähle unten die Lizenzen ↓</td>
 </tr>`
 
-                    document.querySelectorAll('nav > div')[1].innerHTML = '<a href="#providers">Anbietern</a><button onclick="add(\'providers\', \'add\')">Fertig</button>'
+                    nav.querySelectorAll('div')[1].innerHTML = '<a href="#providers">Anbietern</a><button onclick="location.reload()">Abbrechen</button><button onclick="add(\'providers\', \'add\')">Fertig</button>'
                 }
 
                 else if (type == 2) {
@@ -274,7 +282,7 @@
     <td>↓ Wähle unten die Lizenzen ↓</td>
 </tr>`
                     
-                    document.querySelectorAll('nav > div')[2].innerHTML = '<a href="#clients">Kunden</a><button onclick="add(\'clients\', \'add\')">Fertig</button>'
+                    nav.querySelectorAll('div')[2].innerHTML = '<a href="#clients">Kunden</a><button onclick="location.reload()">Abbrechen</button><button onclick="add(\'clients\', \'add\')">Fertig</button>'
                 }
 
                 licenseArray = document.createElement('div')
@@ -285,9 +293,15 @@
                 for (i = 0; i < licenseIds.length; i++)
                     licenseArray.innerHTML += '<div class="license"><input type="checkbox" id=' + licenseIds[i] + '>' + licenseNames[i] + '</div>'
                 table.appendChild(licenseArray)
+
+                document.querySelectorAll('.add').forEach(add => add.onclick = '')
+                navFixed = false
+                nav.style.display = 'flex'
             }
 
             function add(type, action, id = '') {
+                const editRemove = document.querySelector('.edit_remove')
+
                 if (type == 'providers' || type == 'clients') {
                     licenseId = []
                     document.querySelectorAll('.license input').forEach(license => {
@@ -299,6 +313,9 @@
 
                 else
                     licenseId = ''
+
+                if (editRemove)
+                    editRemove.remove()
 
                 $.ajax({
                     url: action + '.php',
@@ -323,19 +340,37 @@
 
             
 
-            function change_remove(element) {
+            function edit_remove(element) {
+                const nav = document.querySelector('nav'),
+                      editRemove = document.querySelector('.edit_remove')
+                checked = false
+
                 document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                    if (checkbox.id != element.id || checkbox.className != element.className)
+                    if ((checkbox.id != element.id || checkbox.className != element.className) && checkbox.checked)
                         checkbox.checked = false
+                    if (checkbox.checked)
+                        checked = true
                 })
 
-                if (document.querySelector('.change_remove'))
-                    document.querySelector('.change_remove').remove()
+                if (editRemove)
+                    editRemove.remove()
 
-                document.querySelector('nav').innerHTML += `<div class="change_remove" bis_skin_checked="1">
-    <input type="button" value="Bearbeiten" onclick="edit('${element.className}', '${element.id}')">
-    <input type="button" value="Löschen" onclick="remove('${element.className}', '${element.id}')">
+                if (checked) {
+                    nav.innerHTML += `<div class="edit_remove" bis_skin_checked="1">
+    <button onclick="edit('${element.className}', '${element.id}')">Bearbeiten</button>
+    <button onclick="remove('${element.className}', '${element.id}')">Löschen</button>
 </div>`
+                    navFixed = false
+                    nav.style.display = 'flex'
+                }
+
+                else {
+                    navFixed = true
+                    if (window.scrollY == 0)
+                        nav.style.display = 'flex'
+                    else
+                        nav.style.display = 'none'
+                }
             }
 
             function edit(type, id) {
@@ -343,7 +378,7 @@
                     if (checkbox.id == id)
                         row = checkbox.parentNode.parentNode.parentNode
                 })
-                td = row.querySelectorAll('td')
+                const td = row.querySelectorAll('td')
 
                 if (type == 'licenses') {
                     date = td[5].innerText.split('.')
@@ -392,7 +427,8 @@
                     row.parentNode.parentNode.parentNode.appendChild(licenseArray)
                 }
 
-                document.querySelector('.change_remove').innerHTML = `<input type="button" value="Abbrechen" onclick="location.reload()"><input type="button" value="Fertig" onclick="add('${type}', 'edit', '${id}')">`
+                document.querySelectorAll('.add').forEach(add => add.onclick = '')
+                document.querySelector('.edit_remove').innerHTML = `<button onclick="location.reload()">Abbrechen</button><button onclick="add('${type}', 'edit', '${id}')">Fertig</button>`
             }
 
             function remove(type, id) {
@@ -410,7 +446,7 @@
             window.addEventListener('scroll', () => {
                 if (window.scrollY == 0)
                     document.querySelector('nav').style.display = 'flex'
-                else
+                else if (navFixed)
                     document.querySelector('nav').style.display = 'none'
             })
 
@@ -418,7 +454,7 @@
                 if (window.scrollY > 0) {
                     if (e.clientY <= 80)
                         document.querySelector('nav').style.display = 'flex'
-                    else
+                    else if (navFixed)
                         document.querySelector('nav').style.display = 'none'
                 }
             })

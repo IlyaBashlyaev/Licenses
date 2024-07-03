@@ -32,5 +32,7 @@
 
         $connection -> query('INSERT INTO `clients` (`id`, `license-id`, `name`, `short-name`) VALUES
         (' . $clientId . ', "' . $_POST['license-id'] . '", "' . $_POST['name'] . '", "' . $_POST['short-name'] . '")');
+        echo 'INSERT INTO `clients` (`id`, `license-id`, `name`, `short-name`) VALUES
+        (' . $clientId . ', "' . $_POST['license-id'] . '", "' . $_POST['name'] . '", "' . $_POST['short-name'] . '")';
     }
 ?>
